@@ -89,13 +89,14 @@ Copy `.env.example` to `.env.local` and override as needed.
 1. Go to `http://localhost:3000/onboarding`
 2. Choose "Connect My SCP Server"
 3. Enter your endpoint URL (e.g. `https://scp.mystore.com/v1`)
-4. The Console discovers it via `/.well-known/scp-configuration` and verifies it responds
+4. The Console discovers it via `/.well-known/shopper-context-protocol` and verifies it responds
 5. Click Save — the dashboard now governs your real endpoint
 
 Your server must:
-- Serve `GET /.well-known/scp-configuration` → JSON with discovery metadata
-- Implement `POST /v1/oauth/token` with `client_credentials` grant type
-- Implement `GET /v1/context/:shopper_id?scopes=...` with Bearer auth
+- Serve `GET /.well-known/shopper-context-protocol` → JSON with discovery metadata
+- Expose `GET /v1/capabilities` → declared scopes and endpoints
+- Implement `POST /v1/token` (`authorization_code` grant; demo auto-approves)
+- Implement `POST /v1/rpc` (JSON-RPC 2.0) with Bearer auth for all data methods
 
 ---
 
@@ -107,14 +108,15 @@ Endpoints:
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/.well-known/scp-configuration` | Discovery metadata |
-| `POST` | `/v1/oauth/token` | Token (auto-approves all credentials in demo) |
-| `GET` | `/v1/context/:shopper_id` | Returns context filtered by `?scopes=` param |
+| `GET` | `/.well-known/shopper-context-protocol` | Discovery metadata |
+| `GET` | `/v1/capabilities` | Declared scopes and endpoints |
+| `POST` | `/v1/token` | Token (auto-approves all credentials in demo) |
+| `POST` | `/v1/rpc` | JSON-RPC 2.0 dispatcher for all data methods |
 | `GET` | `/health` | Health check |
 
 Five pre-loaded shoppers: `shopper_001` – `shopper_005`.
 
-Scopes: `order_history`, `loyalty`, `preferences`, `payment_methods`.
+Scopes: `orders`, `loyalty`, `offers`, `preferences`.
 
 ---
 
