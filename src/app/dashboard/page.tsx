@@ -110,8 +110,8 @@ export default function DashboardOverview({ searchParams }: Props) {
               inspect the live response.
             </p>
             <p>
-              <strong>3. Flip a scope</strong> — Toggle order_history off, re-run, and watch the
-              data disappear from the response.
+              <strong>3. Flip a scope</strong> — Toggle <code>offers</code> on, re-run, and watch
+              personalised promotions appear in the response.
             </p>
             <p>
               <strong>4. Export the log</strong> — Every change and request is recorded. Download

@@ -102,7 +102,7 @@ export function ConnectStep({ onComplete, onBack }: Props) {
             className="font-mono text-sm"
           />
           <p className="text-xs text-slate-400">
-            Must serve <code>/.well-known/scp-configuration</code>
+            Must serve <code>/.well-known/shopper-context-protocol</code>
           </p>
         </div>
 

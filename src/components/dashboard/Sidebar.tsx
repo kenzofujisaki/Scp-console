@@ -51,7 +51,7 @@ export function Sidebar() {
 
       <div className="border-t border-slate-200 p-4">
         <Link
-          href="/onboarding"
+          href={`/dashboard/connect?merchantId=${merchantId}`}
           className="block text-xs text-slate-400 hover:text-slate-600"
         >
           + Connect a server

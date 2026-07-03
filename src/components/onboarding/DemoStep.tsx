@@ -64,11 +64,11 @@ export function DemoStep({ onComplete }: Props) {
           </li>
           <li className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-            order_history, loyalty, preferences — exposed
+            orders, loyalty, preferences — exposed
           </li>
           <li className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-            payment_methods — blocked by default
+            offers — blocked by default
           </li>
           <li className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
