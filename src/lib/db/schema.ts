@@ -21,7 +21,7 @@ export const scopeSettings = sqliteTable("scope_settings", {
     .notNull()
     .references(() => merchants.id, { onDelete: "cascade" }),
   dataType: text("data_type", {
-    enum: ["order_history", "loyalty", "preferences", "payment_methods"],
+    enum: ["orders", "loyalty", "offers", "preferences"],
   }).notNull(),
   exposed: integer("exposed", { mode: "boolean" }).notNull().default(true),
   updatedAt: integer("updated_at", { mode: "timestamp" })

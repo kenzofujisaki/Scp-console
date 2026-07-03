@@ -20,7 +20,7 @@ export function RequestTester({ endpointUrl }: Props) {
   const merchantId = searchParams.get("merchantId") ?? "";
 
   const [shopperId, setShopperId] = useState("shopper_001");
-  const [scopes, setScopes] = useState<SCPScope[]>(["order_history", "loyalty", "preferences"]);
+  const [scopes, setScopes] = useState<SCPScope[]>(["orders", "loyalty", "preferences"]);
   const [result, setResult] = useState<SCPProxyResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [ran, setRan] = useState(false);

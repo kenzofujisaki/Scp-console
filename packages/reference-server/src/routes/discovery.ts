@@ -1,18 +1,26 @@
-import { Hono } from "hono";
+import type { Context } from "hono";
 
 const BASE = process.env.SCP_BASE_URL ?? "http://localhost:8787";
 
-export const discoveryRouter = new Hono();
+export function wellKnownHandler(c: Context) {
+  return c.json({
+    version: "scp1",
+    endpoint: `${BASE}/v1`,
+  });
+}
 
-discoveryRouter.get("/", (c) =>
-  c.json({
-    protocol_version: "1.0",
-    merchant_name: "Acme Outdoor Co.",
-    token_endpoint: `${BASE}/v1/oauth/token`,
-    context_endpoint: `${BASE}/v1/context`,
-    supported_scopes: ["order_history", "loyalty", "preferences", "payment_methods"],
-    scp_spec_version: "2024-11",
-    description:
-      "Acme Outdoor Co. reference SCP implementation. For development and testing only.",
-  }),
-);
+export function capabilitiesHandler(c: Context) {
+  return c.json({
+    version: "1.0",
+    protocol_version: "scp1",
+    scopes_supported: ["orders", "loyalty", "offers", "preferences"],
+    authorization_endpoint: `${BASE}/v1/authorize/init`,
+    token_endpoint: `${BASE}/v1/token`,
+    revocation_endpoint: `${BASE}/v1/revoke`,
+    grant_types_supported: ["authorization_code", "refresh_token"],
+    code_challenge_methods_supported: ["S256"],
+    magic_link_supported: false,
+    webhook_support: false,
+    rate_limit: { requests_per_minute: 100, requests_per_hour: 1000 },
+  });
+}

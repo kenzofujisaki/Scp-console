@@ -15,7 +15,7 @@ export function ContextBrowser() {
   const merchantId = searchParams.get("merchantId") ?? "";
 
   const [shopperId, setShopperId] = useState("shopper_001");
-  const [scopes, setScopes] = useState<SCPScope[]>(["order_history", "loyalty"]);
+  const [scopes, setScopes] = useState<SCPScope[]>(["orders", "loyalty"]);
   const [result, setResult] = useState<SCPProxyResult | null>(null);
   const [loading, setLoading] = useState(false);
 

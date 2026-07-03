@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
       ? "denied"
       : "success";
 
-  const dataTypesReturned = responseData?.scopes_returned ?? [];
+  const dataTypesReturned = filteredScopes;
 
   // Persist test run + audit event (no shopper payload stored)
   db.insert(testRuns)

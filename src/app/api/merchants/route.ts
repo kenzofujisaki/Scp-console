@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { merchants, scopeSettings } from "@/lib/db/schema";
 
-const ALL_SCOPES = ["order_history", "loyalty", "preferences", "payment_methods"] as const;
+const ALL_SCOPES = ["orders", "loyalty", "offers", "preferences"] as const;
 
 export async function GET() {
   const db = getDb();

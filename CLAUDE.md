@@ -67,10 +67,45 @@ policy_changes     — id, merchant_id, data_type, from_state, to_state, changed
 Fake merchant "Acme Outdoor Co." with 5 shoppers (`shopper_001` – `shopper_005`). Shoppers defined in `packages/reference-server/src/data/shoppers.ts`. The server auto-approves all OAuth token requests — it is demo-only.
 
 Default scope policy (set in `src/lib/db/seed.ts`):
-- `order_history` → exposed
+- `orders` → exposed
 - `loyalty` → exposed
 - `preferences` → exposed
-- `payment_methods` → **blocked**
+- `offers` → **blocked** (demonstrates the governance toggle out of the box)
+
+## SCP Protocol Reference
+
+Full spec lives in `docs/scp-spec-reference.md`. Key facts to avoid drift:
+
+**Canonical scope names (v1.0):** `orders`, `loyalty`, `offers`, `preferences`
+
+**All data flows through one JSON-RPC 2.0 endpoint:**
+```
+POST /v1/rpc
+{"jsonrpc":"2.0","id":1,"method":"scp.get_orders","params":{"shopper_id":"..."}}
+```
+
+| Scope | JSON-RPC method |
+|---|---|
+| `orders` | `scp.get_orders` |
+| `loyalty` | `scp.get_loyalty` |
+| `offers` | `scp.get_offers` |
+| `preferences` | `scp.get_preferences` |
+
+**Endpoints on the reference server (`http://localhost:8787`):**
+- `GET /.well-known/shopper-context-protocol` → `{ version: "scp1", endpoint: "http://localhost:8787/v1" }`
+- `GET /v1/capabilities` → full capabilities object
+- `POST /v1/token` → demo auto-approve; returns `scp_demo_*` token
+- `POST /v1/rpc` → JSON-RPC 2.0 dispatcher (requires `Authorization: Bearer scp_demo_*`)
+
+**SCP client (`src/lib/scp/client.ts`):**
+- `discover()` → `GET {baseUrl}/capabilities`
+- `getToken()` → `POST {baseUrl}/token`
+- `getContext(shopperId, scopes)` → parallel `POST {baseUrl}/rpc` per scope, results merged into `SCPShopper`
+
+**Intentional demo divergences** (documented, not bugs):
+- No real magic-link email — auto-approves all token requests
+- No PKCE verification in demo flow
+- Shopper identity via `shopper_id` in params instead of JWT `sub` claim
 
 ## Environment variables
 

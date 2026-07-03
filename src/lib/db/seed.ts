@@ -3,12 +3,8 @@ import { getDb } from "./index";
 import { merchants, scopeSettings } from "./schema";
 import type { Merchant } from "./schema";
 
-const ALL_SCOPES = [
-  "order_history",
-  "loyalty",
-  "preferences",
-  "payment_methods",
-] as const;
+// Canonical SCP v1.0 scope names — see docs/scp-spec-reference.md
+const ALL_SCOPES = ["orders", "loyalty", "offers", "preferences"] as const;
 
 function getScpEndpoint(): string {
   return process.env.SCP_TEST_ENDPOINT ?? "http://localhost:8787/v1";
@@ -41,8 +37,9 @@ export function seedReferenceMerchant(): Merchant {
       .values({
         merchantId: merchant.id,
         dataType: scope,
-        // payment_methods blocked by default — highest sensitivity data type
-        exposed: scope !== "payment_methods",
+        // offers blocked by default — personalised promotions are lower-sensitivity
+        // but we block them here to demonstrate the governance toggle out of the box
+        exposed: scope !== "offers",
       })
       .run();
   }
