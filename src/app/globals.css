@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Canvas + surfaces — a subtle cool ladder, not flat white on white */
+    --background: 220 33% 98%;
+    --surface-sunken: 220 28% 95.5%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Ink */
+    --foreground: 222 47% 11%;
+    --muted: 220 20% 96%;
+    --muted-foreground: 220 12% 46%;
+
+    /* Identity — a confident indigo, distinct from the default blue-500 */
+    --primary: 243 75% 59%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 20% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --accent: 243 75% 96%;
+    --accent-foreground: 243 60% 40%;
+
+    /* Status is reserved — only ever means state, never decoration */
+    --destructive: 350 74% 49%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 20% 90%;
+    --input: 220 20% 88%;
+    --ring: 243 75% 59%;
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 224 40% 6%;
+    --surface-sunken: 224 38% 9%;
+    --card: 224 34% 9.5%;
+    --card-foreground: 210 30% 96%;
+    --popover: 224 34% 9.5%;
+    --popover-foreground: 210 30% 96%;
+
+    --foreground: 210 30% 96%;
+    --muted: 223 30% 15%;
+    --muted-foreground: 218 14% 62%;
+
+    --primary: 243 85% 72%;
+    --primary-foreground: 224 40% 8%;
+    --secondary: 223 30% 15%;
+    --secondary-foreground: 210 30% 96%;
+    --accent: 243 40% 20%;
+    --accent-foreground: 243 90% 88%;
+
+    --destructive: 350 70% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 223 26% 18%;
+    --input: 223 26% 20%;
+    --ring: 243 85% 72%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* Inter looks its best with contextual alternates + tabular figures off by default */
+    font-feature-settings:
+      "cv02" 1,
+      "cv03" 1,
+      "cv04" 1,
+      "cv11" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Tabular, aligned figures for anything numeric — stats, counts, latency */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* A quieter, self-consistent focus ring across the app */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring/60 ring-offset-2 ring-offset-background;
+  }
+
+  /* Refined scrollbars — present but recessive */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border: 3px solid transparent;
+    border-radius: 9999px;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  ::selection {
+    background-color: hsl(var(--primary) / 0.16);
+  }
+}
+
+@layer utilities {
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-in-up {
+    animation: fade-in-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+/* Respect users who ask for reduced motion — neutralise animations/transitions */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

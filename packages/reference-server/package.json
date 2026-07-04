@@ -1,0 +1,18 @@
+{
+  "name": "@scp/reference-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Acme Outdoor Co. — a demo Shopper Context Protocol server (Hono).",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@scp/protocol": "1.0.0",
+    "@hono/node-server": "^1.12.0",
+    "hono": "^4.4.13"
+  }
+}
