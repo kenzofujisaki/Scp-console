@@ -57,7 +57,7 @@ export function RequestPreview({ shopperId, scopes, endpointUrl }: Props) {
           Request Preview
         </span>
       </div>
-      <pre className="overflow-auto p-4 font-mono text-xs leading-relaxed text-slate-100">
+      <pre className="max-h-[440px] overflow-auto p-4 font-mono text-xs leading-relaxed text-slate-100">
         <code>{curlLines}</code>
       </pre>
     </div>
