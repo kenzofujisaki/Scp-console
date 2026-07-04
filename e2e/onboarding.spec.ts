@@ -17,14 +17,15 @@ test("welcome screen leads with the value proposition and both paths", async ({ 
   await expect(page.getByText("Withheld")).toBeVisible();
 });
 
-test("demo path seeds the reference store and opens the dashboard", async ({ page }) => {
+test("demo path seeds the reference store and lands on the scope toggle", async ({ page }) => {
   await page.goto("/onboarding");
   await page.getByRole("button", { name: /Explore the live demo/ }).click();
   await expect(page.getByRole("heading", { name: /Your demo store is ready/ })).toBeVisible({
     timeout: 10_000,
   });
   await page.getByRole("button", { name: /Open the dashboard/ }).click();
-  await expect(page).toHaveURL(/\/dashboard\?merchantId=/);
+  // Demo users land directly on Scope Controls with the coach-mark flag
+  await expect(page).toHaveURL(/\/dashboard\/scopes\?merchantId=.*coach=1/);
 });
 
 test("connect path shows the form and can return to the demo", async ({ page }) => {
