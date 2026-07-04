@@ -46,7 +46,7 @@ are thin barrels that re-export the packages and add app-only concerns
 - **`src/lib/db/index.ts`** — `getDb()` singleton. Auto-migrates on first call. All API routes use this. SQLite is synchronous — no `await` on DB calls.
 - **`src/lib/db/schema.ts`** — Source of truth for all tables. After changing this, run `npm run db:generate` and commit the generated migration file.
 - **`src/app/api/scp/context/route.ts`** — Core proxy route. Applies scope policy, calls SCP server, writes audit record. All in one transaction flow.
-- **`src/lib/scp/client.ts`** — `SCPClient` class. Instantiate per-request (no global singleton). Token is cached inside the instance.
+- **`packages/client/src/index.ts`** — `SCPClient` class (`@scp/client`; re-exported by the app barrel `src/lib/scp/client.ts`). Instantiate per-request (no global singleton). Token is cached inside the instance.
 - **`packages/reference-server/src/index.ts`** — Hono entry point. All routes declared here.
 
 ## Conventions
@@ -120,10 +120,46 @@ POST /v1/rpc
 ```
 DATABASE_PATH=./scp-console.db   # Path to SQLite file
 SCP_TEST_ENDPOINT=http://localhost:8787/v1  # SCP server base URL
+SCP_ALLOW_PRIVATE_ENDPOINTS=false  # SSRF opt-out — set true to connect to localhost/private hosts in dev
 ```
 
-Both have sensible defaults. Copy `.env.example` to `.env.local` for local overrides.
+All have sensible defaults. Copy `.env.example` to `.env.local` for local overrides.
+
+## UI, security & product conventions
+
+- **Design tokens** — `src/app/globals.css` defines the HSL token layer (indigo
+  `--primary`, layered surfaces) for **light and dark**. Use tokens
+  (`bg-card`, `text-muted-foreground`, `border-border`) not hardcoded `slate-*`,
+  so both themes work. Fixed accent chips (emerald/amber/rose) need `dark:` variants.
+- **Theme** — no-FOUC `<script>` in `src/app/layout.tsx` sets the `dark` class
+  before paint (localStorage `scp-theme` → system pref). Toggle:
+  `src/components/theme/ThemeToggle.tsx`. Global `prefers-reduced-motion` rule
+  neutralises animations.
+- **Posture semantics** — a scope being **exposed** = emerald "live"; **blocked/withheld**
+  = calm neutral, NOT error-red. Red/rose is reserved for genuine failures/denials
+  (e.g. audit status). Sensitivity (risk) is a separate amber/rose axis.
+- **SSRF guard** — `src/lib/security/url.ts`. Any user-supplied endpoint URL
+  (`/api/scp/probe`, `POST /api/merchants`) must pass `assertSafeEndpointUrl` (sync,
+  scheme + literal-host) AND `await assertEndpointResolvesPublic` (DNS resolve check).
+  Never `fetch()` a raw user URL server-side without it.
+- **First-run coach-mark** — the demo path lands on
+  `/dashboard/scopes?coach=1`; `ScopeControls` shows a one-time spotlight
+  (persisted via localStorage `scp-coached`) guiding the first `offers` flip.
+- **Demo GIF** — `docs/media/first-run-demo.gif` (regenerate via Playwright
+  video → PNG frames → `gifenc`; the bundled `/opt/pw-browsers` ffmpeg is
+  recording-only, no gif encoder).
 
 ## Testing
 
-Unit tests live in `src/test/`. Run with `npm test`. Tests use Vitest with vi.spyOn for fetch mocking. No integration tests against the live DB — test against the pure functions and SCP client.
+Unit tests live in `src/test/` (Vitest, `vi.spyOn`/`vi.mock`); e2e in `e2e/`
+(Playwright, `npm run test:e2e` — drives the real dev stack incl. reference server).
+Current: **54 unit + 10 e2e**. When touching timestamps use `toDate()` from
+`@/lib/utils` (Drizzle timestamps serialise to ISO strings over JSON — multiplying
+by 1000 gives `NaN`). SSRF DNS checks take an injectable resolver so tests stay
+network-free.
+
+## Project status
+
+Initial build is **merged to main** (PR #1). SCP is packaged as real workspaces;
+the app, redesign (light/dark), onboarding funnel, coach-mark, and SSRF hardening
+are all in. Per repo rules, start follow-up work from a fresh branch off `main`.
