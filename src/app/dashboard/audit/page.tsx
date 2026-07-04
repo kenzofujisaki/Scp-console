@@ -1,5 +1,7 @@
 import { AuditLog } from "@/components/audit/AuditLog";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Audit Log — SCP Console",
 };

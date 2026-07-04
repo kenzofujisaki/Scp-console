@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { getReferenceMerchant } from "@/lib/db/seed";
 
+// Reads the DB to route first-run vs returning users — resolved per request.
+export const dynamic = "force-dynamic";
+
 /**
  * Root route: detect whether the reference merchant has been seeded.
  * If seeded, go straight to the dashboard — zero extra click for returning users.

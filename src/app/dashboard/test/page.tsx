@@ -4,6 +4,8 @@ import { getDb } from "@/lib/db";
 import { merchants } from "@/lib/db/schema";
 import { RequestTester } from "@/components/testing/RequestTester";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Request Tester — SCP Console",
 };

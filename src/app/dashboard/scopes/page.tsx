@@ -1,5 +1,7 @@
 import { ScopeControls } from "@/components/scopes/ScopeControls";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Scope Controls — SCP Console",
 };

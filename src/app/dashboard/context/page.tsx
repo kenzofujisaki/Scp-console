@@ -1,5 +1,7 @@
 import { ContextBrowser } from "@/components/context/ContextBrowser";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Context Browser — SCP Console",
 };
