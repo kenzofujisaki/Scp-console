@@ -1,0 +1,16 @@
+{
+  "name": "@scp/client",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimal, dependency-free HTTP client for the Shopper Context Protocol.",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@scp/protocol": "1.0.0"
+  }
+}

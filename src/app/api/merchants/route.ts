@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { merchants, scopeSettings } from "@/lib/db/schema";
+import { assertSafeEndpointUrl, UnsafeUrlError } from "@/lib/security/url";
 
 const ALL_SCOPES = ["orders", "loyalty", "offers", "preferences"] as const;
 
@@ -21,9 +22,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    new URL(scpEndpointUrl);
-  } catch {
-    return NextResponse.json({ error: "scpEndpointUrl must be a valid URL" }, { status: 400 });
+    assertSafeEndpointUrl(scpEndpointUrl);
+  } catch (err) {
+    if (err instanceof UnsafeUrlError) {
+      return NextResponse.json({ error: err.message }, { status: 400 });
+    }
+    throw err;
   }
 
   const db = getDb();

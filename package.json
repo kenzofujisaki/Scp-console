@@ -2,6 +2,9 @@
   "name": "scp-console",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "concurrently --names \"console,scp\" --prefix-colors \"cyan,green\" --kill-others \"next dev\" \"tsx watch packages/reference-server/src/index.ts\"",
     "dev:console": "next dev",

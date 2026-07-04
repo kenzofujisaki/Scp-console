@@ -7,7 +7,7 @@ SCP Console is the human control plane for the Shopper Context Protocol. It's a 
 ## Running the project
 
 ```bash
-npm install       # Install all dependencies (root package.json only — no workspaces)
+npm install       # Installs the root app + all workspace packages (npm workspaces: packages/*)
 npm run dev       # Starts both Next.js (port 3000) and the Hono reference server (port 8787)
 ```
 
@@ -30,8 +30,16 @@ npm run db:studio       # Drizzle Studio UI for inspecting the DB
 | Frontend | Next.js 14 App Router, Tailwind, shadcn/ui | `src/app/`, `src/components/` |
 | API | Next.js API Routes, Node.js runtime | `src/app/api/` |
 | DB | Drizzle ORM + better-sqlite3 (SQLite) | `src/lib/db/` |
-| SCP client | Plain fetch, TypeScript | `src/lib/scp/client.ts` |
-| Reference server | Hono.js | `packages/reference-server/src/` |
+| SCP protocol | Types, scopes, methods, error codes (zero deps) | `packages/protocol/` (`@scp/protocol`) |
+| SCP client | Plain fetch, TypeScript | `packages/client/` (`@scp/client`) |
+| Reference server | Hono.js | `packages/reference-server/` (`@scp/reference-server`) |
+
+The protocol and client are real workspace packages consumed by both the Next
+app and the reference server (imported as `@scp/protocol` / `@scp/client`, never
+via reach-into-`src` relative paths). The app's `src/lib/scp/{types,client}.ts`
+are thin barrels that re-export the packages and add app-only concerns
+(`SCOPE_META`, `SCPProxyResult`). Resolution is wired via root `tsconfig` paths,
+`vitest` aliases, and workspace symlinks (for `tsx`).
 
 ## Critical paths
 

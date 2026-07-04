@@ -1,4 +1,4 @@
-import type { SCPOrder, SCPLoyalty, SCPOffer, SCPPreferences } from "../../../../src/lib/scp/types";
+import type { SCPOrder, SCPLoyalty, SCPOffer, SCPPreferences } from "@scp/protocol";
 
 export interface Shopper {
   id: string;

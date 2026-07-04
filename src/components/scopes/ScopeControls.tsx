@@ -87,11 +87,12 @@ export function ScopeControls() {
 
   return (
     <div className="space-y-4">
-      {/* Spotlight backdrop — dims the page and focuses attention on one control */}
+      {/* Spotlight backdrop — dims the page and focuses attention on one control.
+          Intentionally not click-to-dismiss, so a stray click can't fizzle the
+          moment; dismissal is via the explicit controls in the coach-mark. */}
       {coaching && (
         <div
           className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-[1px] animate-in-up"
-          onClick={dismissCoach}
           aria-hidden
         />
       )}

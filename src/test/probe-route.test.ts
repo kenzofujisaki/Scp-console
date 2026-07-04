@@ -38,7 +38,7 @@ describe("GET /api/scp/probe", () => {
     const mockConfig = { version: "1.0", protocol_version: "scp1" };
     mockDiscover.mockResolvedValueOnce(mockConfig);
     const req = new NextRequest(
-      "http://localhost/api/scp/probe?url=http%3A%2F%2Flocalhost%3A8787%2Fv1",
+      "http://localhost/api/scp/probe?url=https%3A%2F%2Fscp.example.com%2Fv1",
     );
     const res = await GET(req);
     expect(res.status).toBe(200);
@@ -50,12 +50,39 @@ describe("GET /api/scp/probe", () => {
   it("returns 200 with healthy:false when discover throws (never 5xx)", async () => {
     mockDiscover.mockRejectedValueOnce(new Error("ECONNREFUSED"));
     const req = new NextRequest(
-      "http://localhost/api/scp/probe?url=http%3A%2F%2Flocalhost%3A8787%2Fv1",
+      "http://localhost/api/scp/probe?url=https%3A%2F%2Fscp.example.com%2Fv1",
     );
     const res = await GET(req);
     expect(res.status).toBe(200);
     const body = (await res.json()) as { healthy: boolean; error: string };
     expect(body.healthy).toBe(false);
     expect(body.error).toContain("ECONNREFUSED");
+  });
+
+  it("rejects a loopback address (SSRF guard) before any fetch", async () => {
+    const req = new NextRequest("http://localhost/api/scp/probe?url=http%3A%2F%2F127.0.0.1%2Fv1");
+    const res = await GET(req);
+    expect(res.status).toBe(400);
+    expect(mockDiscover).not.toHaveBeenCalled();
+  });
+
+  it("rejects the cloud metadata address (SSRF guard)", async () => {
+    const req = new NextRequest(
+      "http://localhost/api/scp/probe?url=http%3A%2F%2F169.254.169.254%2Flatest%2Fmeta-data",
+    );
+    const res = await GET(req);
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toMatch(/private, loopback, or link-local/);
+  });
+
+  it("rejects a non-http(s) scheme", async () => {
+    const req = new NextRequest(
+      "http://localhost/api/scp/probe?url=file%3A%2F%2F%2Fetc%2Fpasswd",
+    );
+    const res = await GET(req);
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toMatch(/http and https/);
   });
 });

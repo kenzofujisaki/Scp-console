@@ -60,3 +60,13 @@ test("audit log page shows Export CSV button", async ({ page }) => {
   await expect(page.locator("h2", { hasText: "Audit Log" })).toBeVisible();
   await expect(page.getByRole("button", { name: /export/i })).toBeVisible();
 });
+
+test("context browser fetches live data through the SCP client and reference server", async ({
+  page,
+}) => {
+  // Exercises the full data path: app → @scp/client → reference server RPC → merged response
+  await page.goto(`/dashboard/context?merchantId=${merchantId}`);
+  await page.getByRole("button", { name: "Fetch Context" }).click();
+  await expect(page.getByText("HTTP 200")).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText(/"orders"/)).toBeVisible();
+});

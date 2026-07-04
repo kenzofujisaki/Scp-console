@@ -21,7 +21,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@scp/protocol": ["./packages/protocol/src/index.ts"],
+      "@scp/client": ["./packages/client/src/index.ts"]
     },
     "baseUrl": "."
   },

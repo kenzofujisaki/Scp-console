@@ -15,6 +15,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@scp/protocol": path.resolve(__dirname, "./packages/protocol/src/index.ts"),
+      "@scp/client": path.resolve(__dirname, "./packages/client/src/index.ts"),
     },
   },
 });

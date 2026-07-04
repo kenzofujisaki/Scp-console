@@ -1,4 +1,5 @@
 import type { Context } from "hono";
+import { SCP_ERROR } from "@scp/protocol";
 import { SHOPPER_MAP } from "../data/shoppers";
 
 interface RPCRequest {
@@ -21,7 +22,7 @@ export async function rpcHandler(c: Context) {
   const auth = c.req.header("Authorization") ?? "";
   if (!auth.startsWith("Bearer scp_demo_")) {
     return c.json(
-      rpcError(null, -32000, "Unauthorized — obtain a token via POST /v1/token"),
+      rpcError(null, SCP_ERROR.UNAUTHORIZED, "Unauthorized — obtain a token via POST /v1/token"),
       401,
     );
   }
@@ -30,17 +31,21 @@ export async function rpcHandler(c: Context) {
   try {
     req = await c.req.json<RPCRequest>();
   } catch {
-    return c.json(rpcError(null, -32700, "Parse error"), 400);
+    return c.json(rpcError(null, SCP_ERROR.PARSE, "Parse error"), 400);
   }
 
   if (req.jsonrpc !== "2.0" || !req.method) {
-    return c.json(rpcError(req.id ?? null, -32600, "Invalid request"), 400);
+    return c.json(rpcError(req.id ?? null, SCP_ERROR.INVALID_REQUEST, "Invalid request"), 400);
   }
 
   const shopperId = req.params?.shopper_id;
   if (typeof shopperId !== "string") {
     return c.json(
-      rpcError(req.id, -32602, "Invalid params — shopper_id (string) required in params"),
+      rpcError(
+        req.id,
+        SCP_ERROR.INVALID_PARAMS,
+        "Invalid params — shopper_id (string) required in params",
+      ),
       400,
     );
   }
@@ -50,7 +55,7 @@ export async function rpcHandler(c: Context) {
     return c.json(
       rpcError(
         req.id,
-        -32004,
+        SCP_ERROR.SHOPPER_NOT_FOUND,
         `Shopper not found: '${shopperId}'. Valid ids: ${[...SHOPPER_MAP.keys()].join(", ")}`,
       ),
       404,
@@ -71,6 +76,9 @@ export async function rpcHandler(c: Context) {
       return c.json(rpcResult(req.id, { preferences: shopper.preferences }));
 
     default:
-      return c.json(rpcError(req.id, -32601, `Method not found: ${req.method}`), 404);
+      return c.json(
+        rpcError(req.id, SCP_ERROR.METHOD_NOT_FOUND, `Method not found: ${req.method}`),
+        404,
+      );
   }
 }
