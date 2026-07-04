@@ -40,12 +40,27 @@ All optional — the defaults are correct for the bundled demo:
 | `SCP_TEST_ENDPOINT` | `http://localhost:8787/v1` | Leave as-is to use the bundled reference server. |
 | `SCP_ALLOW_PRIVATE_ENDPOINTS` | `false` | Only needed if you point "connect your own server" at a private host. |
 
-## Notes
+## Design decisions & trade-offs
 
-- **Data is ephemeral** (SQLite on the container filesystem) — expected for a
-  demo; it re-seeds automatically.
-- Node **20** is pinned via `engines` in `package.json`.
-- If you'd rather split the app and the reference server into two services,
-  deploy the reference server separately and set the web service's
-  `SCP_TEST_ENDPOINT` to its URL (public domain, or `*.railway.internal` over
-  Railway's private network). The single-service setup above is simpler for a demo.
+The deploy is tuned for a self-contained demo. Each choice below is deliberate;
+the production-grade alternative is noted so the boundary is explicit.
+
+- **One service runs two processes** (`next start` + the reference server, via
+  `concurrently`). Pragmatic for a demo, not a standard production pattern. The
+  clean alternative is two services with the web app's `SCP_TEST_ENDPOINT`
+  pointed at the reference server — public domain, or `*.railway.internal` over
+  Railway's private network.
+- **`tsx` at runtime** — the reference server runs TypeScript directly rather
+  than a compiled bundle (which is why `tsx` is a runtime dependency, not a dev
+  one). A stricter setup would precompile it (esbuild/tsc) and run plain `node`.
+- **The reference server binds a hardcoded `8787`** while Next takes `$PORT`. No
+  collision in practice, but it isn't defensive if a platform ever set
+  `PORT=8787`.
+- **SQLite is ephemeral** on the container filesystem — it re-seeds on first
+  visit after each deploy. Intended for a demo, not durable storage.
+- **Dashboard routes are `force-dynamic`.** They read request-time search params
+  and the DB, so they render on demand rather than being prerendered at build
+  (`/onboarding` stays static). Correct for a per-merchant, live-data app —
+  worth confirming the intent before reusing the pattern elsewhere.
+- **Node 20** is pinned via `engines` in `package.json` for `better-sqlite3`'s
+  native binary.
