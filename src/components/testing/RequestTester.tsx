@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { ShopperSelector, PRESET_SHOPPERS } from "@/components/context/ShopperSelector";
 import { ScopeCheckboxGroup } from "@/components/context/ScopeCheckboxGroup";
 import { JsonViewer } from "@/components/context/JsonViewer";
+import { AiUseCases } from "@/components/context/AiUseCases";
 import { RequestPreview } from "./RequestPreview";
 import type { SCPProxyResult, SCPScope } from "@/lib/scp/types";
 
@@ -111,6 +112,7 @@ export function RequestTester({ endpointUrl }: Props) {
           data={result?.data ?? null}
           placeholder="Request preview above. Click Run Request to execute."
         />
+        <AiUseCases granted={ran && result ? result.filteredScopes : scopes} />
       </div>
     </div>
   );
