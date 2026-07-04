@@ -15,6 +15,7 @@ export function ConnectPageClient({ merchantId }: Props) {
       <ConnectStep
         onComplete={(newMerchantId) => router.push(`/dashboard?merchantId=${newMerchantId}`)}
         onBack={() => router.push(`/dashboard?merchantId=${merchantId}`)}
+        showDemoHint={false}
       />
     </div>
   );
