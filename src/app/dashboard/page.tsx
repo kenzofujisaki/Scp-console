@@ -5,6 +5,9 @@ import { auditEvents, merchants, scopeSettings } from "@/lib/db/schema";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+// Reads the DB and the merchantId query param — never statically prerendered.
+export const dynamic = "force-dynamic";
+
 interface Props {
   searchParams: { merchantId?: string };
 }

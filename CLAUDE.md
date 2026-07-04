@@ -57,6 +57,11 @@ are thin barrels that re-export the packages and add app-only concerns
 - **No PII** — audit_events and test_runs store metadata only (scope names, status, latency). Never store shopper emails, names, or payload content.
 - **Path alias** — use `@/` for all imports from `src/`. Never use relative `../../`.
 - **No comments on obvious code.** Only add a comment when the WHY is non-obvious.
+- **Dynamic rendering** — pages that read the DB or `searchParams` (`/` and all
+  `/dashboard/*`) export `dynamic = "force-dynamic"`. Don't remove it: static
+  prerender hits `useSearchParams()` CSR bailouts and DB access at build, which
+  breaks `next build`. Deployment (single Railway service running the app +
+  reference server) is documented in `DEPLOY.md`.
 
 ## DB schema summary
 

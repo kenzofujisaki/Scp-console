@@ -1,6 +1,9 @@
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
+// The dashboard is per-merchant and client-search-param driven — always dynamic.
+export const dynamic = "force-dynamic";
+
 interface Props {
   children: React.ReactNode;
 }
