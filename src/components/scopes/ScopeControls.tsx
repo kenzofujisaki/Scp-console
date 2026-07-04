@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight, Shield, Sparkles } from "lucide-react";
@@ -29,6 +29,8 @@ export function ScopeControls() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [coaching, setCoaching] = useState(false);
+  const coachDialogRef = useRef<HTMLDivElement>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!merchantId) return;
@@ -52,14 +54,66 @@ export function ScopeControls() {
     setCoaching(true);
   }, [searchParams]);
 
-  const dismissCoach = () => {
+  const dismissCoach = useCallback(() => {
     setCoaching(false);
     try {
       localStorage.setItem(COACH_STORAGE_KEY, "1");
     } catch {
       /* no-op */
     }
-  };
+  }, []);
+
+  // Treat the spotlit scope card as a modal dialog: move focus in on open, trap
+  // Tab within it (the switch + the coach's own controls all live inside), close
+  // on Escape, and restore focus on close. aria-modal is honest here because
+  // everything the user needs is within the dialog.
+  useEffect(() => {
+    if (!coaching) return;
+    const node = coachDialogRef.current;
+    if (!node) return;
+
+    previouslyFocused.current = document.activeElement as HTMLElement | null;
+    node.focus();
+
+    const getFocusable = () =>
+      Array.from(
+        node.querySelectorAll<HTMLElement>(
+          'a[href],button:not([disabled]),[role="switch"]:not([disabled]),input:not([disabled]),[tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null);
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        dismissCoach();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const items = getFocusable();
+      const first = items[0];
+      const last = items.at(-1);
+      if (!first || !last) return;
+      const active = document.activeElement;
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      } else if (active instanceof Node && !node.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      previouslyFocused.current?.focus?.();
+    };
+    // `loading` is a dep so the effect re-runs once the cards mount (the coach
+    // target only exists after the scope list loads, so the ref is null before then).
+  }, [coaching, dismissCoach, loading]);
 
   const toggle = async (dataType: string, newValue: boolean) => {
     setSaving(dataType);
@@ -115,7 +169,16 @@ export function ScopeControls() {
           const isCoachTarget = coaching && scope === COACH_SCOPE;
 
           return (
-            <div key={scope} className={cn("relative", isCoachTarget && "z-50")}>
+            <div
+              key={scope}
+              ref={isCoachTarget ? coachDialogRef : null}
+              role={isCoachTarget ? "dialog" : undefined}
+              aria-modal={isCoachTarget || undefined}
+              aria-labelledby={isCoachTarget ? "coach-title" : undefined}
+              aria-describedby={isCoachTarget ? "coach-desc" : undefined}
+              tabIndex={isCoachTarget ? -1 : undefined}
+              className={cn("relative outline-none", isCoachTarget && "z-50")}
+            >
               <div
                 className={cn(
                   "relative overflow-hidden rounded-xl border bg-card p-4 pl-5 shadow-card transition-all",
@@ -231,8 +294,10 @@ function CoachMark({
 
         {active ? (
           <>
-            <p className="mt-2.5 text-sm font-medium text-foreground">Offers are now live to AI.</p>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            <p id="coach-title" className="mt-2.5 text-sm font-medium text-foreground">
+              Offers are now live to AI.
+            </p>
+            <p id="coach-desc" className="mt-1 text-sm leading-relaxed text-muted-foreground">
               You just changed what every assistant can access — and the change is already in your
               audit log. See it land in a real response:
             </p>
@@ -254,10 +319,10 @@ function CoachMark({
           </>
         ) : (
           <>
-            <p className="mt-2.5 text-sm font-medium text-foreground">
+            <p id="coach-title" className="mt-2.5 text-sm font-medium text-foreground">
               Personalised offers are switched off.
             </p>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            <p id="coach-desc" className="mt-1 text-sm leading-relaxed text-muted-foreground">
               Right now AI assistants can&apos;t see them. Flip the switch above and every future
               request includes them — instantly, no redeploy.
             </p>

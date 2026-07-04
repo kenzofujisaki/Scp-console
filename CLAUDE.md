@@ -145,6 +145,12 @@ All have sensible defaults. Copy `.env.example` to `.env.local` for local overri
 - **First-run coach-mark** — the demo path lands on
   `/dashboard/scopes?coach=1`; `ScopeControls` shows a one-time spotlight
   (persisted via localStorage `scp-coached`) guiding the first `offers` flip.
+  It's an accessible dialog: `role="dialog"` + `aria-modal` over the spotlit
+  card, focus-on-open with return, a Tab focus-trap, and Escape to dismiss.
+- **Responsive shell** — desktop rail (`Sidebar`, `hidden lg:flex`) + a mobile
+  drawer (`MobileNav`, built on Radix Dialog for a free focus-trap/ESC/scroll-lock)
+  triggered from the header hamburger. Shared body in `dashboard/nav.tsx`
+  (`SidebarContent`). Verify new dashboard screens at ~390px.
 - **Demo GIF** — `docs/media/first-run-demo.gif` (regenerate via Playwright
   video → PNG frames → `gifenc`; the bundled `/opt/pw-browsers` ffmpeg is
   recording-only, no gif encoder).
@@ -153,7 +159,7 @@ All have sensible defaults. Copy `.env.example` to `.env.local` for local overri
 
 Unit tests live in `src/test/` (Vitest, `vi.spyOn`/`vi.mock`); e2e in `e2e/`
 (Playwright, `npm run test:e2e` — drives the real dev stack incl. reference server).
-Current: **54 unit + 10 e2e**. When touching timestamps use `toDate()` from
+Current: **54 unit + 11 e2e**. When touching timestamps use `toDate()` from
 `@/lib/utils` (Drizzle timestamps serialise to ISO strings over JSON — multiplying
 by 1000 gives `NaN`). SSRF DNS checks take an injectable resolver so tests stay
 network-free.

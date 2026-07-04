@@ -24,6 +24,20 @@ test.afterAll(async ({ request }) => {
   });
 });
 
+test("coach-mark is an accessible dialog dismissible with Escape", async ({ page, request }) => {
+  await request.patch("/api/scopes", { data: { merchantId, dataType: "offers", exposed: false } });
+  await page.goto(`/dashboard/scopes?merchantId=${merchantId}&coach=1`);
+
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toHaveAttribute("aria-modal", "true");
+  await expect(page.getByText("you're in control")).toBeVisible();
+
+  // Keyboard users can dismiss with Escape
+  await page.keyboard.press("Escape");
+  await expect(page.getByText("you're in control")).toBeHidden();
+});
+
 test("coach-mark guides the first flip and persists dismissal", async ({ page }) => {
   await page.goto(`/dashboard/scopes?merchantId=${merchantId}&coach=1`);
 
