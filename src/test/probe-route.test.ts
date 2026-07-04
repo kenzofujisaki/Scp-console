@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 const { mockDiscover } = vi.hoisted(() => ({
@@ -18,6 +18,10 @@ describe("GET /api/scp/probe", () => {
     mockDiscover.mockReset();
   });
 
+  afterEach(() => {
+    delete process.env.SCP_ALLOW_PRIVATE_ENDPOINTS;
+  });
+
   it("returns 400 when url query param is missing", async () => {
     const req = new NextRequest("http://localhost/api/scp/probe");
     const res = await GET(req);
@@ -35,6 +39,8 @@ describe("GET /api/scp/probe", () => {
   });
 
   it("returns 200 with healthy:true when discover resolves", async () => {
+    // Opt out of the DNS check so the happy path stays hermetic (no real lookup)
+    process.env.SCP_ALLOW_PRIVATE_ENDPOINTS = "true";
     const mockConfig = { version: "1.0", protocol_version: "scp1" };
     mockDiscover.mockResolvedValueOnce(mockConfig);
     const req = new NextRequest(
@@ -48,6 +54,7 @@ describe("GET /api/scp/probe", () => {
   });
 
   it("returns 200 with healthy:false when discover throws (never 5xx)", async () => {
+    process.env.SCP_ALLOW_PRIVATE_ENDPOINTS = "true";
     mockDiscover.mockRejectedValueOnce(new Error("ECONNREFUSED"));
     const req = new NextRequest(
       "http://localhost/api/scp/probe?url=https%3A%2F%2Fscp.example.com%2Fv1",

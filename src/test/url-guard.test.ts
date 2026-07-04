@@ -1,5 +1,20 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { isPrivateHostname, assertSafeEndpointUrl, UnsafeUrlError } from "@/lib/security/url";
+import {
+  isPrivateHostname,
+  assertSafeEndpointUrl,
+  hostnameResolvesToPrivate,
+  assertEndpointResolvesPublic,
+  UnsafeUrlError,
+  type DnsLookup,
+} from "@/lib/security/url";
+
+const resolvesTo =
+  (...ips: string[]): DnsLookup =>
+  async () =>
+    ips.map((address) => ({ address, family: address.includes(":") ? 6 : 4 }));
+const resolveFails: DnsLookup = async () => {
+  throw new Error("ENOTFOUND");
+};
 
 describe("isPrivateHostname", () => {
   it("flags loopback, private, link-local, and CGNAT hosts", () => {
@@ -55,5 +70,42 @@ describe("assertSafeEndpointUrl", () => {
   it("permits private hosts when the opt-out env is set", () => {
     process.env.SCP_ALLOW_PRIVATE_ENDPOINTS = "true";
     expect(assertSafeEndpointUrl("http://localhost:8787/v1").hostname).toBe("localhost");
+  });
+});
+
+describe("DNS-rebinding guard", () => {
+  afterEach(() => {
+    delete process.env.SCP_ALLOW_PRIVATE_ENDPOINTS;
+  });
+
+  it("flags a public hostname whose A-record points inward", async () => {
+    // The rebinding trick: name looks public, resolves to loopback/private
+    expect(await hostnameResolvesToPrivate("rebind.evil.test", resolvesTo("127.0.0.1"))).toBe(true);
+    expect(await hostnameResolvesToPrivate("meta.evil.test", resolvesTo("169.254.169.254"))).toBe(
+      true,
+    );
+  });
+
+  it("allows a hostname that resolves only to public addresses", async () => {
+    expect(await hostnameResolvesToPrivate("scp.example.com", resolvesTo("93.184.216.34"))).toBe(
+      false,
+    );
+  });
+
+  it("is tolerant of resolution failure (no resolve = no SSRF)", async () => {
+    expect(await hostnameResolvesToPrivate("nope.invalid", resolveFails)).toBe(false);
+  });
+
+  it("assertEndpointResolvesPublic throws on an inward-resolving host", async () => {
+    await expect(
+      assertEndpointResolvesPublic("rebind.evil.test", resolvesTo("10.0.0.5")),
+    ).rejects.toBeInstanceOf(UnsafeUrlError);
+  });
+
+  it("assertEndpointResolvesPublic respects the opt-out env", async () => {
+    process.env.SCP_ALLOW_PRIVATE_ENDPOINTS = "true";
+    await expect(
+      assertEndpointResolvesPublic("rebind.evil.test", resolvesTo("127.0.0.1")),
+    ).resolves.toBeUndefined();
   });
 });

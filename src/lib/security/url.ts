@@ -9,10 +9,17 @@
  * Set SCP_ALLOW_PRIVATE_ENDPOINTS=true to permit private hosts for local dev
  * (e.g. pointing the Console at a server on localhost).
  *
- * Note: this validates the URL's literal host. A hardened deployment should
- * additionally resolve the hostname and re-check the resolved IP to defeat
- * DNS-rebinding; that's out of scope for this demo.
+ * Two layers: a synchronous literal-host check (assertSafeEndpointUrl), plus an
+ * async DNS check (assertEndpointResolvesPublic) that resolves the hostname and
+ * rejects if it maps to a private/loopback IP — so a public-looking name whose
+ * A-record points inward (the DNS-rebinding trick) is still refused.
+ *
+ * A fully hardened deployment would also pin the resolved IP and connect to it
+ * directly (a custom fetch lookup) to close the check-to-connect TOCTOU window;
+ * that needs a custom agent and is left as a documented follow-up.
  */
+
+import { lookup } from "node:dns/promises";
 
 export class UnsafeUrlError extends Error {}
 
@@ -76,4 +83,53 @@ export function assertSafeEndpointUrl(raw: string): URL {
   }
 
   return url;
+}
+
+/** Resolver shape — injectable so the DNS check is unit-testable without network. */
+export type DnsLookup = (
+  hostname: string,
+) => Promise<Array<{ address: string; family: number }>>;
+
+const defaultLookup: DnsLookup = (hostname) => lookup(hostname, { all: true, verbatim: true });
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error("dns timeout")), ms);
+    // Don't keep the event loop alive on the timer alone
+    (timer as unknown as { unref?: () => void }).unref?.();
+  });
+  return Promise.race([promise.finally(() => clearTimeout(timer)), timeout]);
+}
+
+/**
+ * Resolve the hostname and report whether any resolved address is private.
+ * Tolerant of resolution failure: a name that doesn't resolve isn't an SSRF risk
+ * (the subsequent fetch simply fails), so we return false rather than block.
+ */
+export async function hostnameResolvesToPrivate(
+  hostname: string,
+  lookupFn: DnsLookup = defaultLookup,
+): Promise<boolean> {
+  let addresses: Array<{ address: string }>;
+  try {
+    addresses = await withTimeout(lookupFn(hostname), 2500);
+  } catch {
+    return false;
+  }
+  return addresses.some((a) => isPrivateHostname(a.address));
+}
+
+/**
+ * Async companion to assertSafeEndpointUrl: rejects a hostname that resolves to a
+ * private/loopback address. Honours the SCP_ALLOW_PRIVATE_ENDPOINTS opt-out.
+ */
+export async function assertEndpointResolvesPublic(
+  hostname: string,
+  lookupFn?: DnsLookup,
+): Promise<void> {
+  if (process.env.SCP_ALLOW_PRIVATE_ENDPOINTS === "true") return;
+  if (await hostnameResolvesToPrivate(hostname, lookupFn)) {
+    throw new UnsafeUrlError("Endpoint hostname resolves to a private or loopback address");
+  }
 }

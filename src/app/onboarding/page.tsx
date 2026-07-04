@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function OnboardingPage() {
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 py-12">
+    <main className="relative flex min-h-screen items-start justify-center overflow-hidden bg-background px-6 pb-16 pt-[9vh]">
       {/* Ambient backdrop — recessive, theme-aware */}
       <div
         aria-hidden

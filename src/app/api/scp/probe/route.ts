@@ -2,7 +2,11 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { SCPClient } from "@/lib/scp/client";
-import { assertSafeEndpointUrl, UnsafeUrlError } from "@/lib/security/url";
+import {
+  assertSafeEndpointUrl,
+  assertEndpointResolvesPublic,
+  UnsafeUrlError,
+} from "@/lib/security/url";
 
 /**
  * GET /api/scp/probe?url=https://scp.example.com/v1
@@ -18,7 +22,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    assertSafeEndpointUrl(rawUrl);
+    const parsed = assertSafeEndpointUrl(rawUrl);
+    await assertEndpointResolvesPublic(parsed.hostname);
   } catch (err) {
     if (err instanceof UnsafeUrlError) {
       return NextResponse.json({ error: err.message }, { status: 400 });
