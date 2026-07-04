@@ -31,7 +31,9 @@ export function ShopperSelector({ value, onChange }: Props) {
 
   return (
     <div className="space-y-2">
-      <Label className="text-xs font-medium uppercase tracking-wide text-slate-500">Shopper</Label>
+      <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        Shopper
+      </Label>
       <Select
         value={isPreset ? value : "custom"}
         onValueChange={(v) => {
@@ -65,11 +67,8 @@ export function ShopperSelector({ value, onChange }: Props) {
         />
       )}
 
-      <p className="text-xs text-slate-400">
-        ID:{" "}
-        <code className="font-mono text-slate-600">
-          {value || "—"}
-        </code>
+      <p className="text-xs text-muted-foreground/80">
+        ID: <code className="font-mono text-muted-foreground">{value || "—"}</code>
       </p>
     </div>
   );

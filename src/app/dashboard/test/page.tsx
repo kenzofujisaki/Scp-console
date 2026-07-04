@@ -23,8 +23,8 @@ export default function TestPage({ searchParams }: Props) {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold text-slate-900">Request Tester</h2>
-        <p className="mt-0.5 text-sm text-slate-500">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Request Tester</h2>
+        <p className="mt-0.5 text-sm text-muted-foreground">
           Simulate an AI assistant request. See the exact response, then check the Audit Log.
         </p>
       </div>

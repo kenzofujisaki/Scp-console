@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const TITLES: Record<string, string> = {
   "/dashboard": "Overview",
@@ -43,13 +44,14 @@ export function Header({ merchantName, endpointUrl, isReference }: Props) {
             {endpointUrl}
           </span>
         )}
-        <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 ring-1 ring-inset ring-emerald-600/20">
+        <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/10">
           <span className="relative flex h-1.5 w-1.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
           </span>
-          <span className="text-xs font-medium text-emerald-700">Online</span>
+          <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">Online</span>
         </span>
+        <ThemeToggle />
       </div>
     </header>
   );

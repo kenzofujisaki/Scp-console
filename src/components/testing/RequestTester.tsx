@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { ShopperSelector, PRESET_SHOPPERS } from "@/components/context/ShopperSelector";
 import { ScopeCheckboxGroup } from "@/components/context/ScopeCheckboxGroup";
 import { JsonViewer } from "@/components/context/JsonViewer";
@@ -69,22 +69,37 @@ export function RequestTester({ endpointUrl }: Props) {
         </Button>
 
         {ran && result && (
-          <div className="space-y-1.5 rounded-lg border border-slate-200 bg-white p-3 text-sm">
-            <div className="flex flex-wrap gap-1.5">
-              <Badge variant={result.status < 400 ? "success" : "destructive"}>
+          <div className="space-y-2 rounded-xl border border-border/70 bg-card p-3 text-sm shadow-card">
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset",
+                  result.status < 400
+                    ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400"
+                    : "bg-rose-50 text-rose-700 ring-rose-600/20 dark:bg-rose-500/10 dark:text-rose-400",
+                )}
+              >
+                <span
+                  className={cn(
+                    "h-1.5 w-1.5 rounded-full",
+                    result.status < 400 ? "bg-emerald-500" : "bg-rose-500",
+                  )}
+                />
                 HTTP {result.status}
-              </Badge>
-              <Badge variant="outline">{result.latencyMs}ms</Badge>
+              </span>
+              <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground tabular-nums">
+                {result.latencyMs}ms
+              </span>
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Scopes sent: {result.filteredScopes.join(", ") || "none"}
             </p>
             {result.scopesDenied.length > 0 && (
-              <p className="text-xs text-amber-700">
-                Blocked: {result.scopesDenied.join(", ")}
+              <p className="text-xs text-amber-700 dark:text-amber-400">
+                Withheld: {result.scopesDenied.join(", ")}
               </p>
             )}
-            <p className="text-xs text-slate-400">Request logged in Audit Log ↗</p>
+            <p className="text-xs text-muted-foreground/70">Request logged in Audit Log ↗</p>
           </div>
         )}
       </div>

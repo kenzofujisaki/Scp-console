@@ -81,14 +81,14 @@ export function ScopeControls() {
               key={scope}
               className={cn(
                 "relative overflow-hidden rounded-xl border bg-card p-4 pl-5 shadow-card transition-colors",
-                isOn ? "border-emerald-200" : "border-border/70",
+                isOn ? "border-emerald-200 dark:border-emerald-500/30" : "border-border/70",
               )}
             >
               {/* State rail — emerald when live, calm slate when withheld */}
               <span
                 className={cn(
                   "absolute inset-y-0 left-0 w-1 transition-colors",
-                  isOn ? "bg-emerald-400" : "bg-slate-200",
+                  isOn ? "bg-emerald-400" : "bg-border",
                 )}
               />
 

@@ -24,7 +24,7 @@ export function ScopeCheckboxGroup({ value, onChange }: Props) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Scopes</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Scopes</p>
       {SCP_SCOPES.map((scope) => {
         const meta = SCOPE_META[scope];
         return (
@@ -39,7 +39,7 @@ export function ScopeCheckboxGroup({ value, onChange }: Props) {
               <Label htmlFor={`scope-${scope}`} className="cursor-pointer font-medium">
                 {meta.label}
               </Label>
-              <p className="text-xs text-slate-400">{meta.description}</p>
+              <p className="text-xs text-muted-foreground/80">{meta.description}</p>
             </div>
           </div>
         );

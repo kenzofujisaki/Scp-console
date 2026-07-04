@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { cn, parseJsonSafe, formatRelativeTime, formatAbsoluteTime } from "@/lib/utils";
+import { cn, parseJsonSafe, formatRelativeTime, formatAbsoluteTime, toDate } from "@/lib/utils";
 
 describe("cn", () => {
   it("merges class names", () => {
@@ -76,5 +76,32 @@ describe("formatAbsoluteTime", () => {
     const d = new Date("2025-06-15T10:30:00Z");
     const unix = Math.floor(d.getTime() / 1000);
     expect(formatAbsoluteTime(unix)).toBe(formatAbsoluteTime(d));
+  });
+});
+
+describe("toDate", () => {
+  const iso = "2025-06-15T10:30:00.000Z";
+  const d = new Date(iso);
+  const epochSeconds = Math.floor(d.getTime() / 1000);
+
+  it("passes a Date through unchanged", () => {
+    expect(toDate(d)).toBe(d);
+  });
+
+  it("parses an ISO string (the shape a Drizzle timestamp takes over JSON)", () => {
+    // Regression: the audit log previously did `isoString * 1000` → NaN → 'NaNd ago'
+    expect(toDate(iso).getTime()).toBe(d.getTime());
+  });
+
+  it("treats a number as Unix epoch seconds", () => {
+    expect(toDate(epochSeconds).getTime()).toBe(d.getTime());
+  });
+
+  it("treats an all-digit string as Unix epoch seconds", () => {
+    expect(toDate(String(epochSeconds)).getTime()).toBe(d.getTime());
+  });
+
+  it("never produces an invalid date for a valid ISO string", () => {
+    expect(Number.isNaN(toDate(iso).getTime())).toBe(false);
   });
 });
