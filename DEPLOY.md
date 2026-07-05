@@ -62,5 +62,6 @@ the production-grade alternative is noted so the boundary is explicit.
   and the DB, so they render on demand rather than being prerendered at build
   (`/onboarding` stays static). Correct for a per-merchant, live-data app —
   worth confirming the intent before reusing the pattern elsewhere.
-- **Node 20** is pinned via `engines` in `package.json` for `better-sqlite3`'s
-  native binary.
+- **Node 22** is pinned via `engines` in `package.json` — `better-sqlite3` ships
+  a prebuilt native binary for it, so the deploy installs without compiling from
+  source.
