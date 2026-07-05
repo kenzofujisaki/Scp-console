@@ -59,6 +59,8 @@ Browser ──▶ Next.js Console (port 3000)
 
 **No auth in v1** — the Console is self-hosted and single-user. Auth deferred until multi-tenancy.
 
+> For deeper detail — critical paths, conventions, the data model, and the full SCP protocol reference — see [`ARCHITECTURE.md`](ARCHITECTURE.md).
+
 ---
 
 ## Data model
@@ -79,8 +81,9 @@ Browser ──▶ Next.js Console (port 3000)
 |---|---|---|
 | `DATABASE_PATH` | `./scp-console.db` | SQLite file path |
 | `SCP_TEST_ENDPOINT` | `http://localhost:8787/v1` | Active SCP server base URL |
+| `SCP_ALLOW_PRIVATE_ENDPOINTS` | `false` | SSRF opt-out — set `true` to connect the Console to a localhost/private SCP server in dev |
 
-Copy `.env.example` to `.env.local` and override as needed.
+Copy `.env.example` to `.env` and override as needed. All values have sensible defaults for the bundled demo.
 
 ---
 
@@ -138,15 +141,13 @@ npm run db:studio    # Drizzle Studio
 
 ---
 
-## Deploying to Railway
+## Deploying
 
-1. Fork this repo
-2. Create a new Railway project from GitHub
-3. Add a service for the Console (Node.js build + `npm start`)
-4. Set `DATABASE_PATH` to a Railway volume mount
-5. Set `SCP_TEST_ENDPOINT` to your production SCP server URL
-
-The reference SCP server is for local development only. In production, point the Console at a real SCP endpoint.
+The demo deploys as a **single service** that runs the Console and the bundled
+reference server together (`npm run start:demo`) — the production mirror of
+`npm run dev`, so the live demo works with zero configuration. Full instructions,
+including the two-service split for pointing at a real SCP endpoint, are in
+[`DEPLOY.md`](DEPLOY.md).
 
 ---
 

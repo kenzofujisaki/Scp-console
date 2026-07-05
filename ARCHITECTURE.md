@@ -1,4 +1,7 @@
-# SCP Console — Claude Code Context
+# SCP Console — Architecture & Conventions
+
+A map of the codebase: how it's structured, the critical paths, the conventions
+that keep it consistent, and the SCP protocol details worth pinning down.
 
 ## What this is
 
@@ -128,7 +131,7 @@ SCP_TEST_ENDPOINT=http://localhost:8787/v1  # SCP server base URL
 SCP_ALLOW_PRIVATE_ENDPOINTS=false  # SSRF opt-out — set true to connect to localhost/private hosts in dev
 ```
 
-All have sensible defaults. Copy `.env.example` to `.env.local` for local overrides.
+All have sensible defaults. Copy `.env.example` to `.env` for local overrides.
 
 ## UI, security & product conventions
 
@@ -168,9 +171,3 @@ Current: **54 unit + 11 e2e**. When touching timestamps use `toDate()` from
 `@/lib/utils` (Drizzle timestamps serialise to ISO strings over JSON — multiplying
 by 1000 gives `NaN`). SSRF DNS checks take an injectable resolver so tests stay
 network-free.
-
-## Project status
-
-Initial build is **merged to main** (PR #1). SCP is packaged as real workspaces;
-the app, redesign (light/dark), onboarding funnel, coach-mark, and SSRF hardening
-are all in. Per repo rules, start follow-up work from a fresh branch off `main`.
