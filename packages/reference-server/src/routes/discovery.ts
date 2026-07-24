@@ -21,6 +21,10 @@ export function capabilitiesHandler(c: Context) {
     code_challenge_methods_supported: ["S256"],
     magic_link_supported: false,
     webhook_support: false,
+    // The bidirectional intent channel is advertised separately from the pull
+    // scopes above — assistants write intent back, the storefront reads it.
+    intent_supported: true,
+    intent_methods: ["scp.put_intent", "scp.get_intent"],
     rate_limit: { requests_per_minute: 100, requests_per_hour: 1000 },
   });
 }

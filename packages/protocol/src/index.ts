@@ -21,6 +21,18 @@ export const SCOPE_TO_METHOD: Record<SCPScope, string> = {
   preferences: "scp.get_preferences",
 };
 
+/**
+ * The intent channel is bidirectional and deliberately NOT a member of
+ * SCP_SCOPES. The four scopes above are outbound pulls — what an assistant
+ * reads FROM the brand. Intent flows the other way: an assistant writes durable
+ * shopper intent back TO the brand (`put_intent`), and the brand's storefront
+ * reads it (`get_intent`) so the shopper doesn't have to reiterate themselves.
+ */
+export const SCP_INTENT_METHODS = {
+  put: "scp.put_intent",
+  get: "scp.get_intent",
+} as const;
+
 /** JSON-RPC 2.0 error codes defined by the SCP spec. */
 export const SCP_ERROR = {
   PARSE: -32700,
@@ -130,4 +142,56 @@ export interface SCPPreferences {
     sms?: boolean;
     push?: boolean;
   };
+}
+
+// --- Intent channel (bidirectional) ---------------------------------------
+
+/** A single concrete constraint on the shopper's intent, e.g. size / color. */
+export interface SCPIntentAttribute {
+  name: string;
+  value: string;
+}
+
+/**
+ * Shopper intent as captured by an assistant, before the brand stores it.
+ * This is the payload written via `scp.put_intent`. `occasion` and `timeframe`
+ * are nullable because they are inferred and may be absent.
+ */
+export interface SCPIntentInput {
+  category: string;
+  occasion: string | null;
+  timeframe: string | null;
+  attributes: SCPIntentAttribute[];
+  summary: string;
+  /** Where the intent originated, e.g. "chat". Defaults to "chat" server-side. */
+  source?: string;
+}
+
+/**
+ * Durable, transferable shopper intent as stored and returned by the brand.
+ * The server assigns `intent_id`, `created_at`, and `expires_at`.
+ */
+export interface SCPIntent extends SCPIntentInput {
+  intent_id: string;
+  shopper_id: string;
+  source: string;
+  created_at: string;
+  expires_at: string;
+}
+
+/**
+ * A catalog product returned when the storefront merchandises against intent.
+ * Shared shape so the client, console, and reference server never drift.
+ */
+export interface SCPProduct {
+  id: string;
+  name: string;
+  category: string;
+  useCases: string[];
+  gender: "men" | "women" | "unisex";
+  colors: string[];
+  material?: string;
+  sizes: string[];
+  price: number;
+  blurb: string;
 }

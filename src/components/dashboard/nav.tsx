@@ -2,13 +2,22 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { FlaskConical, LayoutDashboard, Plus, ScrollText, Search, Shield } from "lucide-react";
+import {
+  ArrowLeftRight,
+  FlaskConical,
+  LayoutDashboard,
+  Plus,
+  ScrollText,
+  Search,
+  Shield,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/dashboard/context", label: "Context Browser", icon: Search, exact: false },
   { href: "/dashboard/test", label: "Request Tester", icon: FlaskConical, exact: false },
+  { href: "/dashboard/handoff", label: "Intent Handoff", icon: ArrowLeftRight, exact: false },
   { href: "/dashboard/scopes", label: "Scope Controls", icon: Shield, exact: false },
   { href: "/dashboard/audit", label: "Audit Log", icon: ScrollText, exact: false },
 ];
