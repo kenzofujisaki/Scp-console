@@ -9,7 +9,9 @@ import {
   UnsafeUrlError,
 } from "@/lib/security/url";
 
-const ALL_SCOPES = ["orders", "loyalty", "offers", "preferences"] as const;
+// The four SCP pull scopes plus the bidirectional `intent` channel — all
+// governed through scope_settings.
+const GOVERNED_DATA_TYPES = ["orders", "loyalty", "offers", "preferences", "intent"] as const;
 
 export async function GET() {
   const db = getDb();
@@ -42,7 +44,7 @@ export async function POST(req: NextRequest) {
     .returning()
     .get();
 
-  for (const dataType of ALL_SCOPES) {
+  for (const dataType of GOVERNED_DATA_TYPES) {
     db.insert(scopeSettings).values({ merchantId: merchant.id, dataType, exposed: true }).run();
   }
 

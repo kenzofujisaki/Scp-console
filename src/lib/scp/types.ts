@@ -35,6 +35,27 @@ export const SCOPE_META: Record<
   },
 };
 
+/**
+ * Every data type the console governs: the four SCP pull scopes plus the
+ * bidirectional `intent` channel. `intent` is deliberately not an SCPScope
+ * (it's not a pull scope), but it is governed through the same machinery.
+ */
+export type GovernedDataType = SCPScope | "intent";
+
+/** Presentation metadata for all governed data types, incl. the intent channel. */
+export const DATA_TYPE_META: Record<
+  GovernedDataType,
+  { label: string; description: string; risk: "low" | "medium" | "high" }
+> = {
+  ...SCOPE_META,
+  intent: {
+    label: "Intent",
+    description:
+      "Durable shopper intent carried back from an assistant — category, occasion, timeframe, and attributes",
+    risk: "medium",
+  },
+};
+
 /** Shape returned by the /api/scp/context proxy route. App-specific, not wire spec. */
 export interface SCPProxyResult {
   data: import("@scp/protocol").SCPShopper | null;

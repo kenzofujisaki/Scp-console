@@ -40,7 +40,7 @@ export async function PATCH(req: NextRequest) {
         eq(scopeSettings.merchantId, merchantId),
         eq(
           scopeSettings.dataType,
-          dataType as "orders" | "loyalty" | "offers" | "preferences",
+          dataType as "orders" | "loyalty" | "offers" | "preferences" | "intent",
         ),
       ),
     )

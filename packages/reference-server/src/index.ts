@@ -6,6 +6,7 @@ import { wellKnownHandler, capabilitiesHandler } from "./routes/discovery";
 import { tokenHandler } from "./routes/token";
 import { rpcHandler } from "./routes/rpc";
 import { FAKE_SHOPPERS } from "./data/shoppers";
+import { PRODUCTS } from "./data/products";
 
 const app = new Hono();
 const PORT = 8787;
@@ -38,6 +39,10 @@ app.get("/v1/shoppers", (c) =>
     shoppers: FAKE_SHOPPERS.map((s) => ({ id: s.id, display_name: s.displayName })),
   }),
 );
+
+// The brand's public product catalog. Used by the storefront to render a
+// generic (cold-arrival) grid when no shopper intent is present.
+app.get("/v1/products", (c) => c.json({ products: PRODUCTS }));
 
 app.get("/health", (c) =>
   c.json({

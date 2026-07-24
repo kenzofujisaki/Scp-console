@@ -20,8 +20,12 @@ export const scopeSettings = sqliteTable("scope_settings", {
   merchantId: text("merchant_id")
     .notNull()
     .references(() => merchants.id, { onDelete: "cascade" }),
+  // `intent` is governed alongside the four pull scopes but is a separate
+  // bidirectional channel — one control plane over every data type. The column
+  // is plain SQLite text (no CHECK), so this enum is a compile-time constraint
+  // only and needs no migration.
   dataType: text("data_type", {
-    enum: ["orders", "loyalty", "offers", "preferences"],
+    enum: ["orders", "loyalty", "offers", "preferences", "intent"],
   }).notNull(),
   exposed: integer("exposed", { mode: "boolean" }).notNull().default(true),
   updatedAt: integer("updated_at", { mode: "timestamp" })

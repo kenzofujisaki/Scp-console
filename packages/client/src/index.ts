@@ -6,7 +6,11 @@
  */
 import {
   SCOPE_TO_METHOD,
+  SCP_INTENT_METHODS,
   type SCPCapabilities,
+  type SCPIntent,
+  type SCPIntentInput,
+  type SCPProduct,
   type SCPScope,
   type SCPShopper,
   type SCPTokenResponse,
@@ -106,6 +110,73 @@ export class SCPClient {
     }
 
     return { data, latencyMs, status: worstStatus };
+  }
+
+  /** Single authenticated JSON-RPC call. Shared by the intent-channel methods. */
+  private async callRpc(
+    method: string,
+    params: Record<string, unknown>,
+  ): Promise<{ result: Record<string, unknown> | null; latencyMs: number; status: number }> {
+    const token = await this.getToken();
+    const start = performance.now();
+    const res = await fetch(`${this.baseUrl}/rpc`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    const latencyMs = Math.round(performance.now() - start);
+    if (!res.ok) return { result: null, latencyMs, status: res.status };
+    const rpc = (await res.json()) as SCPRPCResponse;
+    return { result: rpc.result ?? null, latencyMs, status: res.status };
+  }
+
+  /** Agent → brand: write durable shopper intent (`scp.put_intent`). */
+  async putIntent(
+    shopperId: string,
+    intent: SCPIntentInput,
+  ): Promise<{ intent: SCPIntent | null; latencyMs: number; status: number }> {
+    const { result, latencyMs, status } = await this.callRpc(SCP_INTENT_METHODS.put, {
+      shopper_id: shopperId,
+      intent,
+    });
+    return { intent: (result?.intent as SCPIntent | null) ?? null, latencyMs, status };
+  }
+
+  /** Brand → agent: read the shopper's latest intent (`scp.get_intent`). */
+  async getIntent(
+    shopperId: string,
+  ): Promise<{ intent: SCPIntent | null; latencyMs: number; status: number }> {
+    const { result, latencyMs, status } = await this.callRpc(SCP_INTENT_METHODS.get, {
+      shopper_id: shopperId,
+    });
+    return { intent: (result?.intent as SCPIntent | null) ?? null, latencyMs, status };
+  }
+
+  /**
+   * Brand-side convenience: read the carried intent and merchandise the catalog
+   * against it in one call — what the storefront needs to render a warm landing.
+   */
+  async matchProducts(
+    shopperId: string,
+  ): Promise<{
+    intent: SCPIntent | null;
+    products: SCPProduct[];
+    latencyMs: number;
+    status: number;
+  }> {
+    const { result, latencyMs, status } = await this.callRpc("scp.match_products", {
+      shopper_id: shopperId,
+    });
+    return {
+      intent: (result?.intent as SCPIntent | null) ?? null,
+      products: (result?.products as SCPProduct[] | undefined) ?? [],
+      latencyMs,
+      status,
+    };
   }
 
   async healthCheck(): Promise<boolean> {

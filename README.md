@@ -8,7 +8,7 @@ Onboard a merchant onto SCP in ten minutes. See exactly what shopper context you
 
 ## What this is
 
-The [Shopper Context Protocol](https://shoppercontextprotocol.com) (SCP) makes shopper data available to any LLM through one open standard. SCP Console is the governance layer that sits alongside an SCP server and gives humans:
+The Shopper Context Protocol (SCP) is an emerging open standard for agentic commerce: it lets a brand expose shopper data — orders, loyalty, preferences — to any LLM through one endpoint. SCP Console is the governance layer that sits alongside an SCP server and gives humans:
 
 1. **Visibility** — a plain-language view of what an AI assistant actually receives when it queries your endpoint
 2. **Control** — per-data-type scope toggles that take effect on the next request
@@ -16,9 +16,25 @@ The [Shopper Context Protocol](https://shoppercontextprotocol.com) (SCP) makes s
 
 This is not a proxy. It is a control plane. Shopper data stays in your infrastructure; the Console only stores request metadata.
 
+### Intent handoff — the other half
+
+Most agentic-commerce work moves data one way: brand → assistant. But the thing that keeps a customer is the reverse — **durable, transferable intent** flowing assistant → brand. When a shopper tells an assistant *"boots for the Houston Rodeo in March, men's 11, brown leather,"* that intent should travel back so the storefront greets them already knowing why they're there, instead of making them start over.
+
+The Console demonstrates both directions of that loop, governed by the same control plane:
+
+- A shopping assistant turns a free-form message into structured intent (via Claude, with a deterministic fallback so it runs offline).
+- SCP carries the intent back to the brand.
+- The Acme storefront reads it and merchandises against it — a warm, pre-filtered landing.
+- Flip the **intent-sharing** scope off and the same landing goes cold. Every read and write is audited, exactly like the pull scopes.
+
+See it under **Dashboard → Intent Handoff**.
+
 ---
 
 ## Quick start
+
+**Prerequisites:** Node 22+ and a C toolchain (`better-sqlite3` compiles a native
+addon on install — macOS: Xcode CLT; Debian/Ubuntu: `build-essential python3`).
 
 ```bash
 git clone https://github.com/kenzofujisaki/scp-console.git
@@ -32,6 +48,10 @@ Open [http://localhost:3000](http://localhost:3000). You land on the Acme Outdoo
 `npm run dev` starts two processes simultaneously:
 - **SCP Console** (Next.js) → `http://localhost:3000`
 - **Reference SCP server** (Hono) → `http://localhost:8787`
+
+The Intent Handoff demo runs in deterministic "demo mode" out of the box. To enable
+live Claude-powered intent extraction, copy `.env.example` to `.env.local` and set
+`ANTHROPIC_API_KEY`.
 
 ---
 
@@ -158,6 +178,7 @@ including the two-service split for pointing at a real SCP endpoint, are in
 - Bundled reference SCP server + Acme Outdoor Co. fake merchant
 - Zero-setup entry — no account, no signup
 - Context browser, request tester, scope controls, audit log + CSV export
+- **Intent handoff** — assistant → brand intent flow with Claude extraction, governed and audited like any scope
 - Connect-your-own-server onboarding flow
 
 ### Planned fast-follows
